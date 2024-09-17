@@ -18,6 +18,14 @@ export default defineContentScript({
     // Store the current URL
     let currentUrl = window.location.href;
 
+    async function highlightRandomRow(element) {
+      // Get all rows in the table
+      const rows = document.querySelectorAll('.notion-table-view-row');
+      const randomIndex = Math.floor(Math.random() * rows.length);
+      const randomRow = rows[randomIndex];
+      randomRow.style.backgroundColor = 'yellow';
+    }
+
     // Function to run your content script logic
     async function runContentScript() {
       // Set up a MutationObserver to watch for added elements
@@ -26,10 +34,21 @@ export default defineContentScript({
           if (mutation.type === 'childList') {
             mutation.addedNodes.forEach((node) => {
               if (node instanceof HTMLElement) {
-                const notionTableView = node.querySelector('.notion-table-view');
-                if (notionTableView) {
-                  console.log('Found a notion-table-view element:', notionTableView);
-                  // Add your logic here to handle the found notion-table-view element
+                const notionTableViewItemAdd = node.querySelector('.notion-collection-view-item-add');
+                if (notionTableViewItemAdd) {
+                  console.log('Found a notion-table-view-item-add element:', notionTableViewItemAdd);
+                  let randomButtonElement = notionTableViewItemAdd.childNodes[0].cloneNode(true);
+                  randomButtonElement.style.borderRadius = '0';
+                  randomButtonElement.style.boxShadow = 'rgba(255, 255, 255, 0.13) 1px 0px 0px inset';
+                  
+                  randomButtonElement.textContent = "Random";
+                  randomButtonElement?.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    highlightRandomRow(event.currentTarget);
+                    // Add your custom logic here for when the button is clicked
+                  });
+                  notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);
                 }
               }
             });
