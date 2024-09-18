@@ -20,9 +20,10 @@ export default defineContentScript({
 
     function addRandomButton(notionTableViewItemAdd) {
       let randomButtonElement = notionTableViewItemAdd.childNodes[0].cloneNode(true);
+      let siblingBoxShadow = notionTableViewItemAdd.childNodes[1].style.boxShadow;
       randomButtonElement.style.borderRadius = '0';
-      randomButtonElement.style.boxShadow = 'rgba(255, 255, 255, 0.13) 1px 0px 0px inset';
-
+      randomButtonElement.style.boxShadow = siblingBoxShadow;
+      
       randomButtonElement.textContent = "Random";
       randomButtonElement?.addEventListener('click', (event) => {
         event.preventDefault();
