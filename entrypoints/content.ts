@@ -42,7 +42,8 @@ export default defineContentScript({
         let randomRow: Element;
         randomRow = rows[randomIndex];
         if (randomRow) {
-          console.log(randomRow);
+          var checkbox = randomRow.querySelector('input[type=checkbox]');
+          checkbox.click();
         }
       }
     }
