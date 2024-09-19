@@ -1,8 +1,8 @@
 {
-  "name": "wxt-starter",
-  "description": "manifest.json description",
-  "private": true,
-  "version": "0.0.0",
+  "name": "Notion Database random picker",
+  "description": "Randomly pick any item from a Notion database on any view",
+  "private": false,
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -15,7 +15,8 @@
     "zip:firefox": "wxt zip -b firefox",
     "zip:chrome": "wxt zip -b chrome",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "submit:init": "wxt submit init"
   },
   "devDependencies": {
     "typescript": "^5.5.4",
