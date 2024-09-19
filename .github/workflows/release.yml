@@ -30,7 +30,7 @@ jobs:
         with:
           name: zip-archives
           path: |
-            .output//*-chrome.zip
+            .output/*-chrome.zip
             
       # - name: Submit to stores
       #   run: |
