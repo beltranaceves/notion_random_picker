@@ -33,18 +33,64 @@ export default defineContentScript({
       notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);
     }
 
+    function isInlineDatabase(randomButtonElement: Element | null): boolean {
+      return !( randomButtonElement == null || randomButtonElement.closest('.notion-collection_view-block') == null);
+    }
+
+    function findCollectionElement(element: HTMLElement): HTMLElement | null {
+      if (isInlineDatabase(element)) {
+        return element.closest('.notion-collection_view-block').parentNode.closest('.notion-collection_view-block');
+      } else {
+        return element.closest(".notion-scroller")
+      }
+    }
+
+    function getCollectionItems(notionCollection: HTMLElement): Element[] {
+      let collectionItems = [];
+      let collectionItemTypes = [".notion-timeline-item", ".notion-collection-item", "notion"];
+      for (let collectionItemType of collectionItemTypes) {
+        collectionItems.push(...notionCollection.querySelectorAll(collectionItemType));
+      }
+      return collectionItems;
+    }
+
     async function highlightRandomRow(element: HTMLElement) {
-      const notionTableView = element.closest('.notion-collection_view-block').parentNode.closest('.notion-collection_view-block');
-      if (notionTableView) {
-        console.log(notionTableView)
-        const rows = notionTableView.querySelectorAll(".notion-table-view-row");
-        console.log(rows);
+      // determine if the url is a page or database
+      const notionCollection = findCollectionElement(element);
+      if (notionCollection) {
+        // const rows = notionCollection.querySelectorAll(".notion-collection-item");
+        const rows = getCollectionItems(notionCollection);
         const randomIndex = Math.floor(Math.random() * rows.length);
         let randomRow: Element;
         randomRow = rows[randomIndex];
         if (randomRow) {
           var checkbox = randomRow.querySelector('input[type=checkbox]');
-          checkbox.click();
+          if (checkbox) {
+            // Click the checkbox
+            checkbox.click();
+          } else {
+            console.log(randomRow)
+          // Define a list of events to dispatch
+          const events = [
+              { type: 'pointerdown', constructor: PointerEvent },
+              { type: 'mousedown', constructor: MouseEvent },
+              { type: 'pointermove', constructor: PointerEvent },
+              { type: 'mousemove', constructor: MouseEvent },
+              { type: 'pointerup', constructor: PointerEvent },
+              { type: 'mouseup', constructor: MouseEvent },
+              { type: 'click', constructor: PointerEvent}
+          ];
+
+          // Loop through the events and dispatch them
+          for (const event of events) {
+              const customEvent = new event.constructor(event.type, {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window
+              });
+              randomRow.dispatchEvent(customEvent);
+          }
+          }
         }
       }
     }
