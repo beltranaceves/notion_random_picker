@@ -2,7 +2,7 @@
   "name": "Notion Database random picker",
   "description": "Randomly pick any item from a Notion database on any view",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
     "dev": "wxt",

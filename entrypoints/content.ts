@@ -20,6 +20,7 @@ export default defineContentScript({
 
     function addRandomButton(notionTableViewItemAdd) {
       let randomButtonElement = notionTableViewItemAdd.childNodes[0].cloneNode(true);
+      console.log("This is the copy button", randomButtonElement);
       let siblingBoxShadow = notionTableViewItemAdd.childNodes[1].style.boxShadow;
       randomButtonElement.style.borderRadius = '0';
       randomButtonElement.style.boxShadow = siblingBoxShadow;
@@ -30,10 +31,20 @@ export default defineContentScript({
         event.stopPropagation();
         highlightRandomRow(event.target);
       });
-      notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);
+      if (isInlineDatabase(randomButtonElement)) {
+        notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[0]);  
+      } else {
+        notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);  
+      }
+      
     }
 
     function isInlineDatabase(randomButtonElement: Element | null): boolean {
+      if (!( randomButtonElement == null || randomButtonElement.closest('.notion-collection_view-block') == null)) {
+        console.log("This is an inline database");
+      } else {
+        console.log("This is not an inline database");
+      }
       return !( randomButtonElement == null || randomButtonElement.closest('.notion-collection_view-block') == null);
     }
 
