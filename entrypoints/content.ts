@@ -18,12 +18,24 @@ export default defineContentScript({
     // Store the current URL
     let currentUrl = window.location.href;
 
+    function isAddButtonPresent(node) {
+      const addButton = node.querySelector('.AddButtonExt');
+      return addButton !== null;
+    }
+
     function addRandomButton(notionTableViewItemAdd) {
+      if (isAddButtonPresent(notionTableViewItemAdd)) {
+        return;
+      }
+      console.log("This is the notionTableViewItemAdd", notionTableViewItemAdd);
+      console.log("This are the childnodes of notionTableViewItemAdd", notionTableViewItemAdd.childNodes);
       let randomButtonElement = notionTableViewItemAdd.childNodes[0].cloneNode(true);
       console.log("This is the copy button", randomButtonElement);
       let siblingBoxShadow = notionTableViewItemAdd.childNodes[1].style.boxShadow;
       randomButtonElement.style.borderRadius = '0';
       randomButtonElement.style.boxShadow = siblingBoxShadow;
+      randomButtonElement.classList.add('AddButtonExt');
+      
       
       randomButtonElement.textContent = "Random";
       randomButtonElement?.addEventListener('click', (event) => {
@@ -32,20 +44,23 @@ export default defineContentScript({
         highlightRandomRow(event.target);
       });
       if (isInlineDatabase(randomButtonElement)) {
-        notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[0]);  
+        notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);
       } else {
-        notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);  
+        // notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);
+        notionTableViewItemAdd.childNodes[1].before(randomButtonElement);
       }
       
     }
 
     function isInlineDatabase(randomButtonElement: Element | null): boolean {
-      if (!( randomButtonElement == null || randomButtonElement.closest('.notion-collection_view-block') == null)) {
-        console.log("This is an inline database");
-      } else {
-        console.log("This is not an inline database");
-      }
-      return !( randomButtonElement == null || randomButtonElement.closest('.notion-collection_view-block') == null);
+      let isInline = (randomButtonElement != null && document.querySelector('.openAsPageThick') == null);
+      // if (isInline) {
+      //   console.log("This is an inline database");
+      // } else {
+      //   console.log("This is not an inline database");
+      // }
+
+      return isInline;
     }
 
     function findCollectionElement(element: HTMLElement): HTMLElement | null {
@@ -117,12 +132,13 @@ export default defineContentScript({
                 const notionTableViewItemAdd = node.querySelector('.notion-collection-view-item-add');
                 if (notionTableViewItemAdd) {
                   if (notionTableViewItemAdd.childElementCount < 4) {
-                    addRandomButton(notionTableViewItemAdd);
+                    setTimeout(() => {
+                      addRandomButton(notionTableViewItemAdd);
+                    }, 1500);
                   }
                 }
               }
-            });
-          }
+            });          }
         });
       });
 
