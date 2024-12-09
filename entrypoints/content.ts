@@ -18,6 +18,8 @@ export default defineContentScript({
     // Store the current URL
     let currentUrl = window.location.href;
 
+    let previousCheckbox = null;
+
     function isAddButtonPresent(node) {
       const addButton = node.querySelector('.AddButtonExt');
       return addButton !== null;
@@ -27,14 +29,13 @@ export default defineContentScript({
       if (isAddButtonPresent(notionTableViewItemAdd)) {
         return;
       }
-      console.log("This is the notionTableViewItemAdd", notionTableViewItemAdd);
-      console.log("This are the childnodes of notionTableViewItemAdd", notionTableViewItemAdd.childNodes);
       let randomButtonElement = notionTableViewItemAdd.childNodes[0].cloneNode(true);
-      console.log("This is the copy button", randomButtonElement);
       let siblingBoxShadow = notionTableViewItemAdd.childNodes[1].style.boxShadow;
       randomButtonElement.style.borderRadius = '0';
       randomButtonElement.style.boxShadow = siblingBoxShadow;
       randomButtonElement.classList.add('AddButtonExt');
+      randomButtonElement.style.cursor = 'pointer !important';
+      notionTableViewItemAdd.childNodes[0].style.cursor = 'pointer !important';
       
       
       randomButtonElement.textContent = "Random";
@@ -46,20 +47,13 @@ export default defineContentScript({
       if (isInlineDatabase(randomButtonElement)) {
         notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);
       } else {
-        // notionTableViewItemAdd.insertBefore(randomButtonElement, notionTableViewItemAdd.childNodes[1]);
         notionTableViewItemAdd.childNodes[1].before(randomButtonElement);
       }
       
     }
 
     function isInlineDatabase(randomButtonElement: Element | null): boolean {
-      let isInline = (randomButtonElement != null && document.querySelector('.openAsPageThick') == null);
-      // if (isInline) {
-      //   console.log("This is an inline database");
-      // } else {
-      //   console.log("This is not an inline database");
-      // }
-
+      let isInline = !(randomButtonElement != null && document.querySelector('.openAsPageThick') == null);
       return isInline;
     }
 
@@ -83,6 +77,7 @@ export default defineContentScript({
     async function highlightRandomRow(element: HTMLElement) {
       // determine if the url is a page or database
       const notionCollection = findCollectionElement(element);
+      console.log("notionCollection", notionCollection); 
       if (notionCollection) {
         // const rows = notionCollection.querySelectorAll(".notion-collection-item");
         const rows = getCollectionItems(notionCollection);
@@ -94,6 +89,16 @@ export default defineContentScript({
           if (checkbox) {
             // Click the checkbox
             checkbox.click();
+            if (previousCheckbox) {
+              previousCheckbox.click();
+            }
+            previousCheckbox = checkbox;
+            
+            document.body.style.cursor = 'pointer !important';
+            setTimeout(() => {
+                document.body.style.cursor = 'default'
+                document.body.style.cursor = 'pointer !important';
+            }, 500);
           } else {
             console.log(randomRow)
           // Define a list of events to dispatch
@@ -136,6 +141,10 @@ export default defineContentScript({
                       addRandomButton(notionTableViewItemAdd);
                     }, 1500);
                   }
+                }
+                const selectBar = node.querySelector(".pseudoSelection")?.parentElement;
+                if (selectBar) {
+                  selectBar.style.width = "fit-content";
                 }
               }
             });          }
