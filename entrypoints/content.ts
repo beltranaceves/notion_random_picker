@@ -1,8 +1,19 @@
 export default defineContentScript({
   matches: ['*://*.notion.so/*'],
-  main() {
+async main() {
     // Initial run
     runContentScript();
+
+    const settings = await getSettings();
+
+    // Add this function to get settings
+    async function getSettings() {
+      return await chrome.storage.sync.get({
+        rowsPerClick: 1,
+        maxRows: 10,
+        autoload: true
+      });
+    }
 
     // Set up a MutationObserver to detect URL changes
     const observer = new MutationObserver(() => {
